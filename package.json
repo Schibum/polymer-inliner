@@ -4,7 +4,7 @@
   "description": "Convert polymer modules to pure scripts with inline templates",
   "main": "index.js",
   "bin": {
-    "crisper": "bin/polymer-inliner"
+    "polymer-inliner": "bin/polymer-inliner"
   },
   "scripts": {
     "test": "node_modules/.bin/jshint --verbose bin/polymer-inliner index.js test/test.js && node_modules/.bin/mocha"
@@ -21,7 +21,7 @@
   "bugs": {
     "url": "https://github.com/Schibum/polymer-inliner/issues"
   },
-  "homepage": "https://github.com/PolymerLabs/crisper",
+  "homepage": "https://github.com/Schibum/polymer-inliner",
   "dependencies": {
     "dom5": "^1.0.1",
     "jsesc": "^0.5.0",
