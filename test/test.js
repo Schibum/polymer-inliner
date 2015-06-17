@@ -13,13 +13,13 @@ var fs = require('fs');
 var dom5 = require('dom5');
 var pred = dom5.predicates;
 
-suite('Crisper', function() {
-  var crisp = require('../index');
+suite('PolymerInliner', function() {
+  var inline = require('../index');
 
   suite('Split API', function() {
     var obj;
     setup(function() {
-      obj = crisp.split('', 'foo.js');
+      obj = inline.split('', 'foo.js');
     });
 
     test('return object with js and html properties', function() {
@@ -31,15 +31,6 @@ suite('Crisper', function() {
       assert.typeOf(obj.html, 'string');
     });
 
-    test('output js is linked via <script> in the output html <body>', function() {
-      var doc = dom5.parse(obj.html);
-      var outscript = dom5.query(doc, pred.AND(
-        pred.hasTagName('script'),
-        pred.hasAttrValue('src', 'foo.js')
-      ));
-      assert.ok(outscript);
-    });
-
   });
 
   suite('Script Outlining', function() {
@@ -48,7 +39,7 @@ suite('Crisper', function() {
       var obj;
       setup(function() {
         var docText = fs.readFileSync('test/html/index.html', 'utf-8');
-        obj = crisp.split(docText, 'foo.js');
+        obj = inline.split(docText, 'foo.js');
       });
 
       test('Scripts are in order', function() {
@@ -78,6 +69,30 @@ suite('Crisper', function() {
         var actual = script.indexOf(expected);
         assert(actual > -1);
       });
+
+      test('Dom modules are removed from html', function() {
+        var doc = dom5.parse(obj.html);
+        var module = dom5.query(doc, pred.hasTagName('dom-module'));
+        assert(!module);
+      });
+
+      test('Styles are removed from html', function() {
+        var doc = dom5.parse(obj.html);
+        var module = dom5.query(doc, pred.hasTagName('style'));
+        assert(!module);
+      });
+
+      test('Dom modules are registered', function() {
+        var script = obj.js;
+        assert.include(script, 'Polymer.registerInlineDomModule(\'test-module\', '+
+          '\'TestModuleContent\');');
+      });
+
+      test('styles are registered', function() {
+        var script = obj.js;
+        assert.include(script, 'Polymer.registerGlobalStyle(\'TestStyleContent\');');
+      });
+
     });
   });
 });

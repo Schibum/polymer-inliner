@@ -1,17 +1,17 @@
 {
-  "name": "crisper",
-  "version": "1.0.3",
-  "description": "Make an HTML file with inline scripts CSP compliant",
+  "name": "polymer-inliner",
+  "version": "0.1.0",
+  "description": "Convert polymer modules to pure scripts with inline templates",
   "main": "index.js",
   "bin": {
-    "crisper": "bin/crisper"
+    "crisper": "bin/polymer-inliner"
   },
   "scripts": {
-    "test": "node_modules/.bin/jshint --verbose bin/crisper index.js test/test.js && node_modules/.bin/mocha"
+    "test": "node_modules/.bin/jshint --verbose bin/polymer-inliner index.js test/test.js && node_modules/.bin/mocha"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/PolymerLabs/crisper.git"
+    "url": "https://github.com/Schibum/polymer-inliner"
   },
   "author": "The Polymer Authors",
   "license": {
@@ -19,11 +19,12 @@
     "url": "http://polymer.github.io/LICENSE.txt"
   },
   "bugs": {
-    "url": "https://github.com/PolymerLabs/crisper/issues"
+    "url": "https://github.com/Schibum/polymer-inliner/issues"
   },
   "homepage": "https://github.com/PolymerLabs/crisper",
   "dependencies": {
     "dom5": "^1.0.1",
+    "jsesc": "^0.5.0",
     "nopt": "^3.0.1",
     "through2": "^0.6.3"
   },

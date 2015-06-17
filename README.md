@@ -1,26 +1,33 @@
-# Crisper
-> Split inline scripts from an HTML file for CSP compliance
+# Polymer-inliners
+> Try to inline Polymer modules to avoid html includes (which currently cannot
+> be used in the execution context of Chrome extension content scripts).
+
+Inlines dom-module and style tags to calls like this:
+
+    Polymer.registerInlineDomModule('dom-module-id', 'text-content');
+    Polymer.registerGlobalStyle('style-content');
+
 
 ## Usage
 
 Command line usage:
 
-    cat index.html | crisper -h build.html -j build.js
-    crisper --source index.html --html build.html --js build.js
+    cat index.html | polymer-inliner -h residual.html -j build.js
+    polymer-inliner --source index.html --html residual.html --js build.js
 
 Library usage:
 
-    var output = crisper(htmlString, jsOutputFileName);
+    var output = polymer-inliner(htmlString, jsOutputFileName);
     fs.writeFile(htmlOutputFileName, output.html, 'utf-8', ...);
     fs.writeFile(jsOutputFileName, output.js, 'utf-8', ...);
 
 ## Usage with Vulcanize
 
-When using [vulcanize](https://github.com/Polymer/vulcanize), crisper can handle
+When using [vulcanize](https://github.com/Polymer/vulcanize), polymer-inliner can handle
 the html string output directly and write the CSP seperated files on the command
 line
 
-    vulcanize index.html --inline-script | crisper --html build.html --js
+    vulcanize index.html --inline-script | polymer-inliner --html residual.html --js
     build.js
 
 Or programmatically
@@ -29,13 +36,11 @@ Or programmatically
       if (err) {
         return cb(err);
       } else {
-        var out = crisper.split(html, jsFilename)
+        var out = polymer-inliner.split(html, jsFilename)
         cb(null, out.html, out.js);
       }
     });
 
 ## Build Tools
 
-- [gulp-crisper](https://npmjs.com/package/gulp-crisper)
-- *No grunt plugin yet, will you write it?*
-- *No broccoli plugin yet, will you write it?*
+- [gulp-polymer-inliner](https://github.com/Schibum/gulp-polymer-inliner)

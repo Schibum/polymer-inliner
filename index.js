@@ -12,7 +12,9 @@
 'use strict';
 
 var dom5 = require('dom5');
+var dom5 = require('dom5');
 var pred = dom5.predicates;
+var stringEscape = require('jsesc');
 
 var inlineScriptFinder = pred.AND(
   pred.hasTagName('script'),
@@ -29,9 +31,10 @@ var inlineScriptFinder = pred.AND(
 
 function split(source, jsFileName) {
   var doc = dom5.parse(source);
-  var head = dom5.query(doc, pred.hasTagName('head'));
   var body = dom5.query(doc, pred.hasTagName('body'));
   var scripts = dom5.queryAll(doc, inlineScriptFinder);
+  var domModules = dom5.queryAll(body, pred.hasTagName('dom-module'));
+  var styles = dom5.queryAll(doc, pred.hasTagName('style'));
 
   var contents = [];
   scripts.forEach(function(sn) {
@@ -44,12 +47,23 @@ function split(source, jsFileName) {
     }
     contents.push(dom5.getTextContent(sn));
   });
-
-  var newScript = dom5.constructors.element('script');
-  dom5.setAttribute(newScript, 'src', jsFileName);
-  dom5.append(body, newScript);
+  domModules.forEach(function(module) {
+    var id = dom5.getAttribute(module, 'id');
+    var tpl = dom5.getTextContent(module);
+    if (id) {
+      contents.push('Polymer.registerInlineDomModule(\'' + stringEscape(id) +
+        '\', \'' + stringEscape(tpl) + '\');');
+      dom5.remove(module);
+    }
+  });
+  styles.forEach(function(style) {
+    var txt = dom5.getTextContent(style);
+    contents.push('Polymer.registerGlobalStyle(\'' + stringEscape(txt) + '\');');
+    dom5.remove(style);
+  });
 
   var html = dom5.serialize(doc);
+  // TODO: add template inline to Polymer script with same id.
   // newline + semicolon should be enough to capture all cases of concat
   var js = contents.join('\n;');
 
