@@ -85,7 +85,11 @@ suite('PolymerInliner', function() {
       test('Dom modules are registered', function() {
         var script = obj.js;
         assert.include(script, 'Polymer.registerInlineDomModule(\'test-module\', '+
-          '\'TestModuleContent\');');
+          '\'<i>Test</i>ModuleContent\');');
+        // Modules before scripts
+        var oneIndex = script.indexOf('Polymer.registerInline');
+        var twoIndex = script.indexOf('two');
+        assert.ok(oneIndex < twoIndex);
       });
 
       test('styles are registered', function() {

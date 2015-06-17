@@ -37,6 +37,15 @@ function split(source, jsFileName) {
   var styles = dom5.queryAll(doc, pred.hasTagName('style'));
 
   var contents = [];
+  domModules.forEach(function(module) {
+    var id = dom5.getAttribute(module, 'id');
+    var tpl = dom5.serialize(module);
+    if (id) {
+      contents.push('Polymer.registerInlineDomModule(\'' + stringEscape(id) +
+        '\', \'' + stringEscape(tpl) + '\');');
+      dom5.remove(module);
+    }
+  });
   scripts.forEach(function(sn) {
     var nidx = sn.parentNode.childNodes.indexOf(sn) + 1;
     var next = sn.parentNode.childNodes[nidx];
@@ -46,15 +55,6 @@ function split(source, jsFileName) {
       dom5.remove(next);
     }
     contents.push(dom5.getTextContent(sn));
-  });
-  domModules.forEach(function(module) {
-    var id = dom5.getAttribute(module, 'id');
-    var tpl = dom5.getTextContent(module);
-    if (id) {
-      contents.push('Polymer.registerInlineDomModule(\'' + stringEscape(id) +
-        '\', \'' + stringEscape(tpl) + '\');');
-      dom5.remove(module);
-    }
   });
   styles.forEach(function(style) {
     var txt = dom5.getTextContent(style);
