@@ -78,9 +78,7 @@ suite('PolymerInliner', function() {
         var script = obj.js;
         var importIndex = script.indexOf('PolymerInliner.addImportContent\(\'<dom-module');
         var twoIndex = script.indexOf('two');
-        var oneIndex = script.indexOf('one');
         assert.ok(importIndex < twoIndex);
-        assert.ok(oneIndex < importIndex);
       });
 
     });
