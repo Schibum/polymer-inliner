@@ -65,7 +65,6 @@ suite('PolymerInliner', function() {
       test('Styles are removed from html', function() {
         var doc = dom5.parse(obj.html);
         var module = dom5.query(doc, pred.hasTagName('style'));
-        console.log(module);
         assert(!module);
       });
 
@@ -73,10 +72,15 @@ suite('PolymerInliner', function() {
         var script = obj.js;
         assert.match(script, /PolymerInliner\.addImportContent\(\'.*<dom-module/);
         assert.include(script, 'TestStyleContent');
-        // Modules before scripts
-        var oneIndex = script.indexOf('PolymerInliner.addImportContent');
+      });
+
+      test('registatin is in order', function() {
+        var script = obj.js;
+        var importIndex = script.indexOf('PolymerInliner.addImportContent\(\'<dom-module');
         var twoIndex = script.indexOf('two');
-        assert.ok(oneIndex < twoIndex);
+        var oneIndex = script.indexOf('one');
+        assert.ok(importIndex < twoIndex);
+        assert.ok(oneIndex < importIndex);
       });
 
     });

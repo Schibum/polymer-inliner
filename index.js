@@ -33,12 +33,23 @@ function split(source, jsFileName) {
   var doc = dom5.parse(source);
   var body = dom5.query(doc, pred.hasTagName('body'));
   var head = dom5.query(doc, pred.hasTagName('head'));
-  var scripts = dom5.queryAll(doc, inlineScriptFinder);
-  var domModules = dom5.queryAll(body, pred.hasTagName('dom-module'));
 
   var contents = [];
-  dom5.remove(body);
-  scripts.forEach(function(sn) {
+  function wrapContent(node, contentOnly) {
+    var content;
+    if (contentOnly) {
+      content = dom5.serialize(node);
+      dom5.remove(node);
+    } else {
+      var container = dom5.constructors.element('div');
+      dom5.remove(node);
+      dom5.append(container, node);
+      content = dom5.serialize(container);
+    }
+    return 'PolymerInliner.addImportContent(\'' + stringEscape(content) + '\');';
+  }
+
+  function addScript(sn) {
     var nidx = sn.parentNode.childNodes.indexOf(sn) + 1;
     var next = sn.parentNode.childNodes[nidx];
     dom5.remove(sn);
@@ -47,11 +58,21 @@ function split(source, jsFileName) {
       dom5.remove(next);
     }
     contents.push(dom5.getTextContent(sn));
+  }
+
+  var directChildren = [].concat(body.childNodes);
+  directChildren.forEach(function(node) {
+    if (inlineScriptFinder(node)) {
+      addScript(node);
+    } else if (!dom5.isTextNode(node)) {
+      contents.push(wrapContent(node));
+    }
   });
-  var importContent = dom5.serialize(head) + dom5.serialize(body);
-  contents.unshift('PolymerInliner.addImportContent(\'' + stringEscape(importContent) + '\');');
-  dom5.remove(head);
-  dom5.remove(body);
+
+  var scripts = dom5.queryAll(doc, inlineScriptFinder);
+  scripts.forEach(addScript);
+  contents.unshift(wrapContent(head, true));
+  contents.push(wrapContent(body, true));
 
   var html = dom5.serialize(doc);
   // newline + semicolon should be enough to capture all cases of concat
