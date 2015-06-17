@@ -32,20 +32,12 @@ var inlineScriptFinder = pred.AND(
 function split(source, jsFileName) {
   var doc = dom5.parse(source);
   var body = dom5.query(doc, pred.hasTagName('body'));
+  var head = dom5.query(doc, pred.hasTagName('head'));
   var scripts = dom5.queryAll(doc, inlineScriptFinder);
   var domModules = dom5.queryAll(body, pred.hasTagName('dom-module'));
-  var styles = dom5.queryAll(doc, pred.hasTagName('style'));
 
   var contents = [];
-  domModules.forEach(function(module) {
-    var id = dom5.getAttribute(module, 'id');
-    var tpl = dom5.serialize(module);
-    if (id) {
-      contents.push('Polymer.registerInlineDomModule(\'' + stringEscape(id) +
-        '\', \'' + stringEscape(tpl) + '\');');
-      dom5.remove(module);
-    }
-  });
+  dom5.remove(body);
   scripts.forEach(function(sn) {
     var nidx = sn.parentNode.childNodes.indexOf(sn) + 1;
     var next = sn.parentNode.childNodes[nidx];
@@ -56,14 +48,12 @@ function split(source, jsFileName) {
     }
     contents.push(dom5.getTextContent(sn));
   });
-  styles.forEach(function(style) {
-    var txt = dom5.getTextContent(style);
-    contents.push('Polymer.registerGlobalStyle(\'' + stringEscape(txt) + '\');');
-    dom5.remove(style);
-  });
+  var importContent = dom5.serialize(head) + dom5.serialize(body);
+  contents.unshift('PolymerInliner.addImportContent(\'' + stringEscape(importContent) + '\');');
+  dom5.remove(head);
+  dom5.remove(body);
 
   var html = dom5.serialize(doc);
-  // TODO: add template inline to Polymer script with same id.
   // newline + semicolon should be enough to capture all cases of concat
   var js = contents.join('\n;');
 

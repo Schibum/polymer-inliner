@@ -49,20 +49,6 @@ suite('PolymerInliner', function() {
         assert.ok(oneIndex < twoIndex);
       });
 
-      test('Unknown script types are not removed', function() {
-        var script = obj.js;
-        var unknownMatcher = pred.AND(
-          pred.hasTagName('script'),
-          pred.hasAttrValue('type', 'random-type')
-        );
-        var doc = dom5.parse(obj.html);
-        var unknownScript = dom5.query(doc, unknownMatcher);
-        assert(unknownScript);
-
-        var unknownIndex = script.indexOf("DON'T READ THIS");
-        assert.equal(unknownIndex, -1);
-      });
-
       test('Newline Semicolon should be used for concating', function() {
         var script = obj.js;
         var expected = '//inline comment\n;var next_statement';
@@ -79,22 +65,18 @@ suite('PolymerInliner', function() {
       test('Styles are removed from html', function() {
         var doc = dom5.parse(obj.html);
         var module = dom5.query(doc, pred.hasTagName('style'));
+        console.log(module);
         assert(!module);
       });
 
-      test('Dom modules are registered', function() {
+      test('Dom content is registered', function() {
         var script = obj.js;
-        assert.include(script, 'Polymer.registerInlineDomModule(\'test-module\', '+
-          '\'<i>Test</i>ModuleContent\');');
+        assert.match(script, /PolymerInliner\.addImportContent\(\'.*<dom-module/);
+        assert.include(script, 'TestStyleContent');
         // Modules before scripts
-        var oneIndex = script.indexOf('Polymer.registerInline');
+        var oneIndex = script.indexOf('PolymerInliner.addImportContent');
         var twoIndex = script.indexOf('two');
         assert.ok(oneIndex < twoIndex);
-      });
-
-      test('styles are registered', function() {
-        var script = obj.js;
-        assert.include(script, 'Polymer.registerGlobalStyle(\'TestStyleContent\');');
       });
 
     });

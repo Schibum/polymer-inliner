@@ -2,11 +2,9 @@
 > Try to inline Polymer modules to avoid html includes (which currently cannot
 > be used in the execution context of Chrome extension content scripts).
 
-Inlines dom-module and style tags to calls like this:
+Extacts scripts and converts other content to calls like this:
 
-    Polymer.registerInlineDomModule('dom-module-id', 'text-content');
-    Polymer.registerGlobalStyle('style-content');
-
+    Polymer.addImportContent('<dom-module...');
 
 ## Usage
 
