@@ -19,7 +19,7 @@ suite('PolymerInliner', function() {
   suite('Split API', function() {
     var obj;
     setup(function() {
-      obj = inline.split('', 'foo.js');
+      obj = inline.split('');
     });
 
     test('return object with js and html properties', function() {
@@ -39,7 +39,7 @@ suite('PolymerInliner', function() {
       var obj;
       setup(function() {
         var docText = fs.readFileSync('test/html/index.html', 'utf-8');
-        obj = inline.split(docText, 'foo.js');
+        obj = inline.split(docText, {prefix: 'my-'});
       });
 
       test('Scripts are in order', function() {
@@ -70,17 +70,22 @@ suite('PolymerInliner', function() {
 
       test('Dom content is registered', function() {
         var script = obj.js;
-        assert.match(script, /PolymerInliner\.addImportContent\(\'.*<dom-module/);
+        assert.match(script, /PolymerInliner\.addImportContent\(\'.*<my-dom-module/);
         assert.include(script, 'TestStyleContent');
       });
 
       test('registatin is in order', function() {
         var script = obj.js;
-        var importIndex = script.indexOf('PolymerInliner.addImportContent\(\'<dom-module');
+        var importIndex = script.indexOf('PolymerInliner.addImportContent\(\'<my-dom-module');
         var twoIndex = script.indexOf('two');
         assert.ok(importIndex < twoIndex);
       });
 
+      test('custom elements are prefixed', function() {
+        var script = obj.js;
+        assert.include(script, '<my-custom-element><my-a-b></my-a-b></my-custom-element>');
+        assert.include(script, '<style is="my-custom-style">');
+      });
     });
   });
 });

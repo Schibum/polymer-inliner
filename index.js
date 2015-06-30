@@ -29,12 +29,32 @@ var inlineScriptFinder = pred.AND(
   )
 );
 
-function split(source, jsFileName) {
+function isCustomElement(node) {
+  return node.tagName.indexOf('-') >= 0;
+}
+
+
+function prefixCustomElements(doc, prefix) {
+  dom5.queryAll(doc, isCustomElement)
+    .forEach(function(el) {
+      el.tagName = prefix + el.tagName;
+    });
+  dom5.queryAll(doc, pred.hasAttr('is'))
+    .forEach(function(el) {
+      var is = dom5.getAttribute(el, 'is');
+      if (is.indexOf('-') >= 0)
+        dom5.setAttribute(el, 'is', prefix + is);
+    });
+}
+
+function split(source, options) {
+  options = options || {};
+  var prefix = options.prefix || '';
   var doc = dom5.parse(source);
+  prefixCustomElements(doc, prefix);
   var body = dom5.query(doc, pred.hasTagName('body'));
   var head = dom5.query(doc, pred.hasTagName('head'));
   var scripts = dom5.queryAll(doc, inlineScriptFinder);
-  var domModules = dom5.queryAll(body, pred.hasTagName('dom-module'));
 
   var contents = [];
   dom5.remove(body);
